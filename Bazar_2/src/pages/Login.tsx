@@ -11,7 +11,7 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -22,14 +22,21 @@ const Login = () => {
       return;
     }
 
-    const success = login(email, password);
-
-    if (success) {
+    try {
+      await login(email, password);
       navigate('/');
-    } else {
-      setError('Credenciales incorrectas');
+    } catch (error: unknown) {
+      const message = (error as Error).message || '';
+      if (message.includes('user-not-found')) {
+        setError('Usuario no encontrado.');
+      } else if (message.includes('wrong-password')) {
+        setError('Contraseña incorrecta.');
+      } else {
+        setError('Error al iniciar sesión. Verifica tus datos.');
+      }
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (

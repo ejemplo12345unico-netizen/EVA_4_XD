@@ -1,23 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Product } from '../types';
+import { useProducts } from '../../hooks/useProducts';
+import Loading from '../../components/Loading';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { getProduct, removeProduct } = useProducts();
 
   useEffect(() => {
-    if (id) {
-      const saved = localStorage.getItem('products');
-      if (saved) {
-        const products: Product[] = JSON.parse(saved);
-        const found = products.find(p => p.id === id);
-        if (found) setProduct(found);
-      }
-    }
+    const load = async () => {
+      if (!id) return;
+      const found = await getProduct(id);
+      setProduct(found);
+      setLoading(false);
+    };
+
+    load();
   }, [id]);
 
+  const handleDelete = async () => {
+    if (!product) return;
+    if (!window.confirm('¿Eliminar este producto?')) return;
+
+    try {
+      await removeProduct(product.id);
+      navigate('/productos');
+    } catch {
+      // Error handled by hook
+    }
+  };
+
+  if (loading) return <Loading message="Cargando producto..." />;
   if (!product) return <p style={{ textAlign: 'center', marginTop: '50px' }}>Producto no encontrado</p>;
 
   return (
@@ -56,6 +73,7 @@ const ProductDetail = () => {
 
           <div style={{ marginTop: '30px', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
             <button onClick={() => navigate(`/productos/editar/${product.id}`)} className="btn btn-primary">Editar Producto</button>
+            <button onClick={handleDelete} className="btn btn-danger">Eliminar</button>
             <button onClick={() => navigate('/productos')} className="btn btn-ghost">Volver</button>
           </div>
         </div>

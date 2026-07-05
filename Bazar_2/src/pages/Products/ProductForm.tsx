@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Product } from '../types';
+import { useProducts } from '../../hooks/useProducts';
+import Loading from '../../components/Loading';
 
 const ProductForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
-
   const [formData, setFormData] = useState<Product>({
     id: '',
     name: '',
@@ -15,20 +16,24 @@ const ProductForm = () => {
     stock: 0,
     category: '',
     imageUrl: '',
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   });
-
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loadingProduct, setLoadingProduct] = useState(false);
+  const { getProduct, createProduct, updateProduct } = useProducts();
 
   useEffect(() => {
-    if (isEditing && id) {
-      const saved = localStorage.getItem('products');
-      if (saved) {
-        const products: Product[] = JSON.parse(saved);
-        const found = products.find(p => p.id === id);
-        if (found) setFormData(found);
+    const loadProduct = async () => {
+      if (!isEditing || !id) return;
+      setLoadingProduct(true);
+      const product = await getProduct(id);
+      if (product) {
+        setFormData(product);
       }
-    }
+      setLoadingProduct(false);
+    };
+
+    loadProduct();
   }, [id, isEditing]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -51,23 +56,33 @@ const ProductForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
-    const saved = localStorage.getItem('products');
-    let products: Product[] = saved ? JSON.parse(saved) : [];
-
-    if (isEditing) {
-      products = products.map(p => p.id === id ? formData : p);
-    } else {
-      const newProduct = { ...formData, id: Date.now().toString() };
-      products.push(newProduct);
+    try {
+      if (isEditing) {
+        await updateProduct(formData);
+      } else {
+        await createProduct({
+          name: formData.name,
+          description: formData.description,
+          price: formData.price,
+          stock: formData.stock,
+          category: formData.category,
+          imageUrl: formData.imageUrl,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      navigate('/productos');
+    } catch (error) {
+      setErrors({ submit: 'Error guardando el producto. Intenta otra vez.' });
     }
-
-    localStorage.setItem('products', JSON.stringify(products));
-    navigate('/productos');
   };
+
+  if (loadingProduct) {
+    return <Loading message="Cargando producto..." />;
+  }
 
   return (
     <div className="page-container">

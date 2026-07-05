@@ -16,6 +16,7 @@ export interface ContactRequest {
   phone: string;
   message: string;
   status: 'Pendiente' | 'En revisión' | 'Respondido' | 'Cerrado';
+  createdAt?: string;
 }
 
 export interface User {

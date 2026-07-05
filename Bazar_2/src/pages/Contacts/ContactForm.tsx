@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ContactRequest } from '../types';
+import { useContacts } from '../../hooks/useContacts';
+
+type ContactFormData = Omit<ContactRequest, 'id'>;
 
 const ContactForm = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<ContactRequest>({
-    id: '',
+  const { createContact } = useContacts();
+  const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
     phone: '',
@@ -19,7 +22,7 @@ const ContactForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.email || !formData.phone || !formData.message) {
@@ -27,12 +30,15 @@ const ContactForm = () => {
       return;
     }
 
-    const saved = localStorage.getItem('contactRequests');
-    const contacts: ContactRequest[] = saved ? JSON.parse(saved) : [];
-    const newContact = { ...formData, id: Date.now().toString() };
-    contacts.push(newContact);
-    localStorage.setItem('contactRequests', JSON.stringify(contacts));
-    navigate('/contactos');
+    try {
+      await createContact({
+        ...formData,
+        createdAt: new Date().toISOString(),
+      });
+      navigate('/contactos');
+    } catch {
+      setError('No se pudo enviar el mensaje. Intenta de nuevo.');
+    }
   };
 
   return (

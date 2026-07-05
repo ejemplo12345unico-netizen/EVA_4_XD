@@ -9,15 +9,17 @@ const Dashboard = () => {
   const [contacts, setContacts] = useState<ContactRequest[]>([]);
 
   useEffect(() => {
-    const savedProducts = localStorage.getItem('products');
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
+    function safeParse<T>(key: string): T[] {
+      try {
+        const saved = localStorage.getItem(key);
+        return saved ? (JSON.parse(saved) as T[]) : [];
+      } catch {
+        return [];
+      }
     }
 
-    const savedContacts = localStorage.getItem('contactRequests');
-    if (savedContacts) {
-      setContacts(JSON.parse(savedContacts));
-    }
+    setProducts(safeParse<Product>('products'));
+    setContacts(safeParse<ContactRequest>('contactRequests'));
   }, []);
 
   const summary = useMemo(() => {
