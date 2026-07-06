@@ -22,7 +22,7 @@ if (isFirebaseConfigured) {
   authInstance = getAuth(app);
   dbInstance = getFirestore(app);
 } else {
-  console.warn('Firebase no está configurado. Usando modo local de prueba.');
+  console.warn('Firebase no está configurado. Por favor configura las variables en .env y reinicia la app.');
 }
 
 export const auth = authInstance as ReturnType<typeof getAuth> | null;

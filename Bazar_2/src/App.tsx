@@ -28,8 +28,14 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 function App() {
   const firebaseWarning = !isFirebaseConfigured ? (
-    <div className="firebase-warning">
-      <strong>Atención:</strong> Firebase no está configurado. Copia `.env.example` a `.env` y completa las variables de Firebase.
+    <div className="firebase-warning" style={{ background: '#fff4e5', padding: 12, borderRadius: 6, margin: 12, border: '1px solid #ffd9a8' }}>
+      <strong>Atención:</strong> Firebase no está configurado.
+      <div style={{ marginTop: 8 }}>
+        Copia `.env.example` a `.env` y completa las variables de Firebase.
+      </div>
+      <pre style={{ marginTop: 8, background: '#fff', padding: 8, borderRadius: 4 }}>
+        <code>cp .env.example .env</code>
+      </pre>
     </div>
   ) : null;
 

@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) {
-      console.warn('Firebase no está configurado o Auth no está disponible. Se usará login local de demo.');
+      console.warn('Firebase no está configurado o Auth no está disponible.');
       setIsLoading(false);
       return;
     }
@@ -45,30 +45,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const fallbackUser = {
-      id: 'local-admin',
-      name: 'Administrador',
-      email,
-    };
-
     if (!isFirebaseConfigured || !auth) {
-      if (email === 'admin@verdelimon.cl' && password === 'admin123') {
-        setUser(fallbackUser);
-        return;
-      }
       throw new Error('Firebase no está configurado.');
     }
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error: unknown) {
-      const code = typeof error === 'object' && error && 'code' in error ? String((error as { code: unknown }).code) : '';
-      if (code === 'auth/configuration-not-found' && email === 'admin@verdelimon.cl' && password === 'admin123') {
-        setUser(fallbackUser);
-        return;
-      }
-      throw error;
-    }
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   const logout = async () => {

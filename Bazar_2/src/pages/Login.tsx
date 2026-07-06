@@ -94,8 +94,8 @@ const Login = () => {
         </form>
 
         <div className="auth-hint">
-          <p>Usuario demo:</p>
-          <p><strong>admin@verdelimon.cl</strong> / <strong>admin123</strong></p>
+          <p>Ingresa con una cuenta creada en Firebase Authentication.</p>
+          <p><strong>Configura usuarios válidos en Firebase</strong> antes de usar la app.</p>
         </div>
       </div>
     </div>
