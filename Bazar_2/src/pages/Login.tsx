@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { isFirebaseConfigured } from '../firebase';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -35,14 +36,18 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (error: unknown) {
       const message = (error as Error).message || '';
-      if (message.includes('user-not-found')) {
+      if (!isFirebaseConfigured) {
+        setError('Firebase no está configurado. Revisa .env y reinicia la app.');
+      } else if (message.includes('user-not-found')) {
         setError('Usuario no encontrado.');
       } else if (message.includes('wrong-password')) {
         setError('Contraseña incorrecta.');
-      } else if (message.includes('invalid-credentials')) {
-        setError('Credenciales inválidas. Usa admin@verdelimon.cl / admin123.');
+      } else if (message.includes('invalid-email')) {
+        setError('Correo inválido.');
+      } else if (message.includes('too-many-requests')) {
+        setError('Demasiados intentos. Intenta más tarde.');
       } else {
-        setError('Error al iniciar sesión. Verifica tus datos.');
+        setError(`Error al iniciar sesión: ${message}`);
       }
     } finally {
       setIsLoading(false);
