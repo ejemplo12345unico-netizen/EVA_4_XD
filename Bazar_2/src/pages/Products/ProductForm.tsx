@@ -4,6 +4,7 @@ import type { Product } from '../types';
 import { PRODUCT_CATEGORIES } from '../../types';
 import { useProducts } from '../../hooks/useProducts';
 import Loading from '../../components/Loading';
+import { Toast } from '../../components/Toast';
 
 const ProductForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,7 @@ const ProductForm = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loadingProduct, setLoadingProduct] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const { getProduct, createProduct, updateProduct } = useProducts();
 
   useEffect(() => {
@@ -65,6 +67,7 @@ const ProductForm = () => {
     try {
       if (isEditing) {
         await updateProduct(formData);
+        setToast({ message: 'Producto actualizado correctamente', type: 'success' });
       } else {
         await createProduct({
           name: formData.name,
@@ -75,10 +78,11 @@ const ProductForm = () => {
           imageUrl: formData.imageUrl,
           createdAt: new Date().toISOString(),
         });
+        setToast({ message: 'Producto creado correctamente', type: 'success' });
       }
-      navigate('/productos');
+      setTimeout(() => navigate('/productos'), 1500);
     } catch (error) {
-      setErrors({ submit: 'Error guardando el producto. Intenta otra vez.' });
+      setToast({ message: 'Error guardando el producto. Intenta otra vez.', type: 'error' });
     }
   };
 
@@ -148,6 +152,14 @@ const ProductForm = () => {
           </div>
         </form>
       </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+          duration={1500}
+        />
+      )}
     </div>
   );
 };
