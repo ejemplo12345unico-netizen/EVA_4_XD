@@ -93,8 +93,16 @@ const Login = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password) {
+    if (!name.trim() || !email || !password) {
       setToast({ message: 'Completa nombre, correo y contraseña', type: 'error' });
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setToast({ message: 'Por favor ingresa un correo válido', type: 'error' });
+      return;
+    }
+    if (password.length < 6) {
+      setToast({ message: 'La contraseña debe tener al menos 6 caracteres', type: 'error' });
       return;
     }
     setIsLoading(true);
@@ -102,21 +110,26 @@ const Login = () => {
       if (!isFirebaseConfigured) {
         const raw = localStorage.getItem('localUsers');
         const users = raw ? JSON.parse(raw) : [];
-        if (users.find((u: any) => u.email === email)) {
+        if (users.find((u: any) => u.email.toLowerCase() === email.toLowerCase())) {
           setToast({ message: 'El correo ya está registrado (local).', type: 'error' });
         } else {
-          users.push({ name, email, password });
+          const newUser = { name: name.trim(), email: email.toLowerCase(), password };
+          users.push(newUser);
           localStorage.setItem('localUsers', JSON.stringify(users));
           setToast({ message: 'Registro local exitoso. Ya puedes iniciar sesión.', type: 'success' });
           setIsRegistering(false);
+          setName('');
+          setEmail('');
+          setPassword('');
         }
       } else {
-        await register(email, password, name);
+        await register(email, password, name.trim());
         setToast({ message: 'Registro completado. Bienvenido.', type: 'success' });
         setIsRegistering(false);
       }
-    } catch (err) {
-      setToast({ message: 'Error al registrar', type: 'error' });
+    } catch (err: unknown) {
+      const message = (err as Error)?.message || 'Error al registrar';
+      setToast({ message, type: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -184,10 +197,10 @@ const Login = () => {
             {isLoading ? (
               <>
                 <span className="spinner"></span>
-                Ingresando...
+                {isRegistering ? 'Registrando...' : 'Ingresando...'}
               </>
             ) : (
-              'Iniciar Sesión'
+              isRegistering ? 'Registrarse' : 'Iniciar Sesión'
             )}
           </button>
         </form>

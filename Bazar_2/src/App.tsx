@@ -12,6 +12,9 @@ import ProductDetail from './pages/Products/ProductDetail';
 import ContactList from './pages/Contacts/ContactList';
 import ContactForm from './pages/Contacts/ContactForm';
 import AdminLayout from './components/AdminLayout';
+import PublicProducts from './pages/Products/PublicProducts';
+import PublicProductDetail from './pages/Products/PublicProductDetail';
+import About from './pages/About';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { user, isLoading } = useAuth();
@@ -51,6 +54,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/contacto" element={<ContactForm />} />
+          <Route path="/tienda" element={<PublicProducts />} />
+          <Route path="/producto/:id" element={<PublicProductDetail />} />
+          <Route path="/about" element={<About />} />
 
           {/* Protected Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

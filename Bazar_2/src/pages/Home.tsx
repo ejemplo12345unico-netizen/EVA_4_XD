@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import { formatCurrency } from '../utils/format';
@@ -32,17 +32,15 @@ const Home = () => {
             <span className="logo-text">Verde Limón</span>
           </div>
           <nav className="nav-links">
-            <a href="#productos">Productos</a>
-            <a href="#about">Sobre Nosotros</a>
-            <a href="#contact">Contacto</a>
+            <Link to="/tienda">Productos</Link>
+            <Link to="/about">Sobre Nosotros</Link>
+            <Link to="/contacto">Contacto</Link>
             {user ? (
               <button onClick={() => navigate('/dashboard')} className="btn-admin">
                 Panel Admin
               </button>
             ) : (
-              <button onClick={() => navigate('/login')} className="btn-login">
-                Acceso Admin
-              </button>
+              <Link to="/login" className="btn-login">Iniciar Sesión</Link>
             )}
           </nav>
         </div>
