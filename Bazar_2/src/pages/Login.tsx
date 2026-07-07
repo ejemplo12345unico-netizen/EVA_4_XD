@@ -68,12 +68,11 @@ const Login = () => {
     setIsLoading(true);
     try {
       if (!isFirebaseConfigured) {
-        // Local fallback authentication
         const raw = localStorage.getItem('localUsers');
         const users = raw ? JSON.parse(raw) : [];
-        const found = users.find((u: any) => u.email === email && u.password === password);
+        const found = users.find((u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
         if (found) {
-          setToast({ message: 'Sesión iniciada (local)', type: 'success' });
+          setToast({ message: 'Sesión local iniciada (offline)', type: 'success' });
           setTimeout(() => navigate(from, { replace: true }), 800);
         } else {
           setToast({ message: 'Usuario no encontrado (local). Regístrate primero.', type: 'error' });
@@ -86,19 +85,7 @@ const Login = () => {
         } catch (error: unknown) {
           const msg = authError || (error as Error).message || 'Error al iniciar sesión';
           console.error('Login Firebase fallido:', error);
-          if (!auth || msg.includes('network') || msg.includes('auth')) {
-            const raw = localStorage.getItem('localUsers');
-            const users = raw ? JSON.parse(raw) : [];
-            const found = users.find((u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-            if (found) {
-              setToast({ message: 'Sesión local iniciada.', type: 'success' });
-              setTimeout(() => navigate(from, { replace: true }), 800);
-            } else {
-              setToast({ message: msg, type: 'error' });
-            }
-          } else {
-            setToast({ message: msg, type: 'error' });
-          }
+          setToast({ message: msg, type: 'error' });
         }
       }
     } catch (error: unknown) {
@@ -145,26 +132,13 @@ const Login = () => {
           await register(email, password, name.trim());
           setToast({ message: 'Registro completado. Bienvenido.', type: 'success' });
           setIsRegistering(false);
+          setName('');
+          setEmail('');
+          setPassword('');
         } catch (err: unknown) {
           const message = authError || (err as Error)?.message || 'Error al registrar';
           console.error('Registro Firebase fallido:', err);
-          if (!auth || message.includes('network') || message.includes('auth')) {
-            const raw = localStorage.getItem('localUsers');
-            const users = raw ? JSON.parse(raw) : [];
-            if (users.find((u: any) => u.email.toLowerCase() === email.toLowerCase())) {
-              setToast({ message: 'El correo ya está registrado localmente.', type: 'error' });
-            } else {
-              users.push({ name: name.trim(), email: email.toLowerCase(), password });
-              localStorage.setItem('localUsers', JSON.stringify(users));
-              setToast({ message: 'Registro local guardado. Usa iniciar sesión local si Firebase no responde.', type: 'success' });
-              setIsRegistering(false);
-              setName('');
-              setEmail('');
-              setPassword('');
-            }
-          } else {
-            setToast({ message, type: 'error' });
-          }
+          setToast({ message, type: 'error' });
         }
       }
     } catch (err: unknown) {

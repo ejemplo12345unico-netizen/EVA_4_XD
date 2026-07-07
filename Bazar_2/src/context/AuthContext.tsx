@@ -78,7 +78,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code || '';
-      const message = mapFirebaseAuthError(code);
+      const rawMessage = (err as Error)?.message || '';
+      const message = mapFirebaseAuthError(code) || rawMessage || 'Error de autenticación. Intenta de nuevo.';
+      console.error('Auth login error:', { code, rawMessage, err });
       setError(message);
       throw new Error(message);
     }
