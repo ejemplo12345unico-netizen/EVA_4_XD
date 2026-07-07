@@ -1,7 +1,9 @@
-const Loading = ({ message = 'Cargando...' }: { message?: string }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: 32 }}>
+import React from 'react';
+
+const Loading: React.FC<{ message?: string }> = ({ message = 'Cargando...' }) => (
+  <div className="loading-container">
     <div className="spinner" />
-    <p style={{ color: '#4b5563', fontWeight: 600 }}>{message}</p>
+    <p className="loading-message">{message}</p>
   </div>
 );
 

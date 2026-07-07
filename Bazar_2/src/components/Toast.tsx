@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import '../styles/toast.css';
 
 interface ToastProps {
@@ -20,8 +20,14 @@ export const Toast: React.FC<ToastProps> = ({
   }, [duration, onClose]);
 
   return (
-    <div className={`toast toast-${type}`}>
-      <p>{message}</p>
+    <div className={`toast toast-${type}`} role="status" aria-live="polite">
+      <div className="toast-body">
+        <span className={`toast-icon toast-icon-${type}`} aria-hidden="true" />
+        <div className="toast-message">{message}</div>
+        <button className="toast-close" onClick={onClose} aria-label="Cerrar notificación">×</button>
+      </div>
     </div>
   );
 };
+
+export default Toast;

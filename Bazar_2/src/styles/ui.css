@@ -490,3 +490,18 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Loading container used by Loading component */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px;
+}
+
+.loading-message {
+  margin: 0;
+  color: #374151;
+  font-weight: 700;
+}
