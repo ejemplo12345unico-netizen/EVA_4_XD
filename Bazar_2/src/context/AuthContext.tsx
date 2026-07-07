@@ -11,11 +11,24 @@ import {
 interface AuthContextProps {
   user: User | null;
   isLoading: boolean;
+  error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+
+const mapFirebaseAuthError = (code: string): string => {
+  const errorMap: Record<string, string> = {
+    'auth/user-not-found': 'Usuario no encontrado.',
+    'auth/wrong-password': 'Contraseña incorrecta.',
+    'auth/invalid-email': 'Formato de correo inválido.',
+    'auth/user-disabled': 'Esta cuenta ha sido deshabilitada.',
+    'auth/too-many-requests': 'Demasiados intentos fallidos. Intenta más tarde.',
+    'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+  };
+  return errorMap[code] || 'Error al iniciar sesión. Intenta de nuevo.';
+};
 
 const mapFirebaseUser = (firebaseUser: FirebaseUser | null): User | null => {
   if (!firebaseUser) return null;
@@ -29,6 +42,7 @@ const mapFirebaseUser = (firebaseUser: FirebaseUser | null): User | null => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) {
@@ -39,20 +53,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(mapFirebaseUser(firebaseUser));
+      setError(null);
       setIsLoading(false);
     });
     return unsubscribe;
   }, []);
 
   const login = async (email: string, password: string) => {
+    setError(null);
+    
     if (!isFirebaseConfigured || !auth) {
-      throw new Error('Firebase no está configurado.');
+      const msg = 'Firebase no está configurado. Revisa .env y reinicia.';
+      setError(msg);
+      throw new Error(msg);
     }
 
-    await signInWithEmailAndPassword(auth, email, password);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code || '';
+      const message = mapFirebaseAuthError(code);
+      setError(message);
+      throw new Error(message);
+    }
   };
 
   const logout = async () => {
+    setError(null);
+    
     if (!isFirebaseConfigured || !auth) {
       setUser(null);
       return;
@@ -63,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -10,6 +10,7 @@ import {
   query,
   updateDoc,
   orderBy,
+  limit,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../firebase';
 
@@ -31,10 +32,11 @@ export const useProducts = () => {
     }
 
     try {
-      const q = query(productsCollection, orderBy('createdAt', 'desc'));
+      const q = query(productsCollection, orderBy('createdAt', 'desc'), limit(100));
       const snapshot = await getDocs(q);
       setProducts(snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<Product, 'id'>) })));
     } catch (err) {
+      console.error('Error al cargar productos:', err);
       setError('Error al cargar productos.');
     } finally {
       setLoading(false);

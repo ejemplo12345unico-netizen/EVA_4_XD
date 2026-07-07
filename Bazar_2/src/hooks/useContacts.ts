@@ -9,6 +9,7 @@ import {
   query,
   updateDoc,
   orderBy,
+  limit,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../firebase';
 
@@ -30,7 +31,7 @@ export const useContacts = () => {
     }
 
     try {
-      const q = query(contactsCollection, orderBy('name', 'asc'));
+      const q = query(contactsCollection, orderBy('name', 'asc'), limit(200));
       const snapshot = await getDocs(q);
       setContacts(snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<ContactRequest, 'id'>) })));
     } catch {

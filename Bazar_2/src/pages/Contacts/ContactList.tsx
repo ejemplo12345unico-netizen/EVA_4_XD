@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { ContactRequest } from '../types';
+import { CONTACT_STATUSES } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useContacts } from '../../hooks/useContacts';
 import Loading from '../../components/Loading';
@@ -55,10 +56,9 @@ const ContactList = () => {
           <label style={{ fontWeight: '700', color: '#374151' }}>Filtrar por estado</label>
           <select className="form-select" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ maxWidth: '240px' }}>
             <option value="">Todos</option>
-            <option value="Pendiente">Pendiente</option>
-            <option value="En revisión">En revisión</option>
-            <option value="Respondido">Respondido</option>
-            <option value="Cerrado">Cerrado</option>
+            {CONTACT_STATUSES.map((status) => (
+              <option key={status} value={status}>{status}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -82,10 +82,9 @@ const ContactList = () => {
                 <p style={{ margin: '8px 0 12px', color: '#374151' }}>{contact.message}</p>
                 <div className="controls">
                   <select value={contact.status} onChange={(e) => updateStatus(contact.id, e.target.value as ContactRequest['status'])} className="form-select" style={{ maxWidth: '220px' }}>
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="En revisión">En revisión</option>
-                    <option value="Respondido">Respondido</option>
-                    <option value="Cerrado">Cerrado</option>
+                    {CONTACT_STATUSES.map((status) => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
                   </select>
                   <button onClick={() => deleteContact(contact.id)} className="btn btn-danger">Eliminar</button>
                 </div>

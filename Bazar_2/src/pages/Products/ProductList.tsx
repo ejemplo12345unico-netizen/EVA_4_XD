@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useProducts } from '../../hooks/useProducts';
 import Loading from '../../components/Loading';
+import { formatCurrency } from '../../utils/format';
 
 const ProductList = () => {
   const [search, setSearch] = useState('');
@@ -85,7 +86,7 @@ const ProductList = () => {
                 <h3 style={{ margin: '0' }}>{product.name}</h3>
                 <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>{product.category}</p>
                 <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong>${product.price.toLocaleString()}</strong>
+                  <strong>{formatCurrency(product.price)}</strong>
                   <span className="badge">Stock: {product.stock}</span>
                 </div>
                 <div className="controls" style={{ marginTop: '12px' }}>

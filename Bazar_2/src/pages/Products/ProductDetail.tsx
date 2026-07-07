@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Product } from '../types';
 import { useProducts } from '../../hooks/useProducts';
 import Loading from '../../components/Loading';
+import { formatCurrency } from '../../utils/format';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -60,7 +61,7 @@ const ProductDetail = () => {
         <div>
           <p className="eyebrow">Producto</p>
           <h1 style={{ color: '#166534', margin: '0 0 8px' }}>{product.name}</h1>
-          <p style={{ fontSize: '1.25rem', color: '#166534', fontWeight: '700' }}>${product.price.toLocaleString()}</p>
+          <p style={{ fontSize: '1.25rem', color: '#166534', fontWeight: '700' }}>{formatCurrency(product.price)}</p>
 
           <div style={{ margin: '20px 0', display: 'grid', gap: '8px' }}>
             <div><strong>Categoría:</strong> {product.category}</div>

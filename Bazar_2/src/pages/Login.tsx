@@ -9,7 +9,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { login, user, isLoading: authLoading } = useAuth();
+  const { login, user, isLoading: authLoading, error: authError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: Location })?.from?.pathname || '/';
@@ -22,7 +22,6 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
 
     if (!email || !password) {
@@ -31,24 +30,13 @@ const Login = () => {
       return;
     }
 
+    setIsLoading(true);
     try {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (error: unknown) {
-      const message = (error as Error).message || '';
-      if (!isFirebaseConfigured) {
-        setError('Firebase no está configurado. Revisa .env y reinicia la app.');
-      } else if (message.includes('user-not-found')) {
-        setError('Usuario no encontrado.');
-      } else if (message.includes('wrong-password')) {
-        setError('Contraseña incorrecta.');
-      } else if (message.includes('invalid-email')) {
-        setError('Correo inválido.');
-      } else if (message.includes('too-many-requests')) {
-        setError('Demasiados intentos. Intenta más tarde.');
-      } else {
-        setError(`Error al iniciar sesión: ${message}`);
-      }
+      const msg = authError || (error as Error).message || 'Error al iniciar sesión';
+      setError(msg);
     } finally {
       setIsLoading(false);
     }

@@ -1,3 +1,6 @@
+export const CONTACT_STATUSES = ['Pendiente', 'En revisión', 'Respondido', 'Cerrado'] as const;
+export const PRODUCT_CATEGORIES = ['Alimentos', 'Eco', 'Bienestar', 'Libros', 'Otros'] as const;
+
 export interface Product {
   id: string;
   name: string;

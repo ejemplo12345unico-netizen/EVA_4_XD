@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ContactRequest } from '../types';
 import { useContacts } from '../../hooks/useContacts';
+import { isValidEmail, isValidPhone } from '../../utils/format';
 
 type ContactFormData = Omit<ContactRequest, 'id'>;
 
 const ContactForm = () => {
   const navigate = useNavigate();
-  const { createContact } = useContacts();
+  const { createContact, loading } = useContacts();
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -27,6 +28,21 @@ const ContactForm = () => {
 
     if (!formData.name || !formData.email || !formData.phone || !formData.message) {
       setError('Todos los campos son obligatorios.');
+      return;
+    }
+
+    if (!isValidEmail(formData.email)) {
+      setError('Por favor ingresa un correo válido.');
+      return;
+    }
+
+    if (!isValidPhone(formData.phone)) {
+      setError('Por favor ingresa un teléfono válido (al menos 9 dígitos).');
+      return;
+    }
+
+    if (formData.message.length < 10) {
+      setError('El mensaje debe tener al menos 10 caracteres.');
       return;
     }
 
@@ -74,7 +90,9 @@ const ContactForm = () => {
           {error && <div style={{ color: 'red' }}>{error}</div>}
 
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Registrar solicitud</button>
+            <button type="submit" disabled={loading} className="btn btn-primary" style={{ flex: 1 }}>
+              {loading ? 'Enviando...' : 'Registrar solicitud'}
+            </button>
             <button type="button" onClick={() => navigate('/')} className="btn btn-ghost" style={{ flex: 1 }}>Cancelar</button>
           </div>
         </form>

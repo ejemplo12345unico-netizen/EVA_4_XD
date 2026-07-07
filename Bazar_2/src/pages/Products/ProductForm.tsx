@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Product } from '../types';
+import { PRODUCT_CATEGORIES } from '../../types';
 import { useProducts } from '../../hooks/useProducts';
 import Loading from '../../components/Loading';
 
@@ -46,11 +47,12 @@ const ProductForm = () => {
 
   const validate = () => {
     const newErrors: any = {};
-    if (!formData.name) newErrors.name = "El nombre es obligatorio";
-    if (!formData.description) newErrors.description = "La descripción es obligatoria";
+    if (!formData.name?.trim()) newErrors.name = "El nombre es obligatorio";
+    if (!formData.description?.trim()) newErrors.description = "La descripción es obligatoria";
     if (!formData.category) newErrors.category = "Selecciona una categoría";
-    if (formData.price <= 0) newErrors.price = "El precio debe ser mayor a 0";
+    if (formData.price <= 0) newErrors.price = "El precio debe ser mayor a $0";
     if (formData.stock < 0) newErrors.stock = "El stock no puede ser negativo";
+    if (formData.price > 999999) newErrors.price = "El precio excede el máximo permitido";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -125,11 +127,11 @@ const ProductForm = () => {
             <label style={{ fontWeight: 'bold' }}>Categoría</label>
             <select className="form-select" name="category" value={formData.category} onChange={handleChange}>
               <option value="">Selecciona...</option>
-              <option value="Alimentos">Alimentos Saludables</option>
-              <option value="Eco">Productos Ecológicos</option>
-              <option value="Bienestar">Bienestar</option>
-              <option value="Libros">Libros</option>
-              <option value="Otros">Otros</option>
+              {PRODUCT_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat === 'Alimentos' ? 'Alimentos Saludables' : cat === 'Eco' ? 'Productos Ecológicos' : cat}
+                </option>
+              ))}
             </select>
             {errors.category && <small style={{ color: 'red' }}>{errors.category}</small>}
           </div>
