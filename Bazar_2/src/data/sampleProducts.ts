@@ -1,0 +1,66 @@
+import type { Product } from '../types';
+
+export const sampleProducts: Product[] = [
+  {
+    id: 'p-1',
+    name: 'Té de Hierbas Calmantes',
+    description: 'Mezcla tradicional de manzanilla, tilo y menta para relajar cuerpo y mente.',
+    price: 7990,
+    stock: 32,
+    category: 'Tés y Infusiones',
+    imageUrl: 'https://images.unsplash.com/photo-1510627498534-cf7e9002facc?w=800&q=60&auto=format&fit=crop',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'p-2',
+    name: 'Aceite Esencial de Lavanda 10ml',
+    description: 'Aceite puro 100% orgánico, ideal para aromaterapia y relajación.',
+    price: 12990,
+    stock: 18,
+    category: 'Aceites esenciales',
+    imageUrl: 'https://images.unsplash.com/photo-1545653893-36af3273b4b8?w=800&q=60&auto=format&fit=crop',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'p-3',
+    name: 'Jabón Artesanal de Coco',
+    description: 'Suave para la piel, con aroma natural y embalaje ecológico.',
+    price: 4990,
+    stock: 46,
+    category: 'Cuidado corporal',
+    imageUrl: 'https://images.unsplash.com/photo-1581579183835-1b3f6b5c5f2a?w=800&q=60&auto=format&fit=crop',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'p-4',
+    name: 'Suplemento de Vitamina C Natural',
+    description: 'Origen vegetal, ayuda a fortalecer el sistema inmunológico.',
+    price: 15990,
+    stock: 25,
+    category: 'Suplementos',
+    imageUrl: 'https://images.unsplash.com/photo-1601972598192-3f0b9d2f1a2a?w=800&q=60&auto=format&fit=crop',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'p-5',
+    name: 'Crema Facial Hidratante Natural',
+    description: 'Fórmula ligera con aloe vera y aceite de jojoba.',
+    price: 19990,
+    stock: 12,
+    category: 'Cuidado facial',
+    imageUrl: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800&q=60&auto=format&fit=crop',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'p-6',
+    name: 'Infusión Detox',
+    description: 'Combinación de diente de león, jengibre y té verde para purificar.',
+    price: 8990,
+    stock: 30,
+    category: 'Tés y Infusiones',
+    imageUrl: 'https://images.unsplash.com/photo-1506806732259-39c2d0268443?w=800&q=60&auto=format&fit=crop',
+    createdAt: new Date().toISOString(),
+  },
+];
+
+export default sampleProducts;

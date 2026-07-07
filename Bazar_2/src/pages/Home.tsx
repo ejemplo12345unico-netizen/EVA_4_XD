@@ -1,14 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../hooks/useProducts';
 import { formatCurrency } from '../utils/format';
 import '../styles/home.css';
+import { useCart } from '../context/CartContext';
 
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { products, loading, loadProducts } = useProducts();
+  const { add, items, remove, clear, totalItems, totalPrice } = useCart();
+  const [cartOpen, setCartOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -100,6 +103,14 @@ const Home = () => {
                       <span className="stock-badge out-of-stock">Agotado</span>
                     )}
                   </div>
+                  <div style={{ padding: '16px 24px', display: 'flex', gap: 12 }}>
+                    <button className="btn btn-accent" onClick={() => add(product, 1)} disabled={product.stock <= 0}>
+                      Añadir al carrito
+                    </button>
+                    <button className="btn btn-ghost" onClick={() => navigate(`/productos/${product.id}`)}>
+                      Ver
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -176,6 +187,43 @@ const Home = () => {
           <p>&copy; 2024 Verde Limón. Todos los derechos reservados.</p>
         </div>
       </footer>
+
+      {/* Cart Drawer */}
+      <div className={`cart-drawer ${cartOpen ? 'open' : ''}`}>
+        <div className="cart-header">
+          <h3>Carrito ({totalItems})</h3>
+          <div>
+            <button className="btn btn-ghost" onClick={() => clear()}>Vaciar</button>
+            <button className="btn btn-danger" onClick={() => setCartOpen(false)}>Cerrar</button>
+          </div>
+        </div>
+        <div className="cart-body">
+          {items.length === 0 ? (
+            <p className="empty-state">Tu carrito está vacío</p>
+          ) : (
+            items.map(it => (
+              <div key={it.id} className="cart-item">
+                <div>
+                  <strong>{it.name}</strong>
+                  <div style={{ fontSize: 13 }}>{formatCurrency(it.price)} x {it.quantity}</div>
+                </div>
+                <div>
+                  <button className="btn btn-ghost" onClick={() => remove(it.id)}>Quitar</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        <div className="cart-footer">
+          <strong>Total: {formatCurrency(totalPrice)}</strong>
+          <button className="btn btn-primary">Ir a pagar</button>
+        </div>
+      </div>
+
+      {/* Floating cart button */}
+      <button className="floating-cart" onClick={() => setCartOpen((s) => !s)}>
+        🛒 {totalItems}
+      </button>
     </div>
   );
 };

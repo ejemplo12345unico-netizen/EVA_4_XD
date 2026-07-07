@@ -13,8 +13,10 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [name, setName] = useState('');
 
-  const { login, user, isLoading: authLoading, error: authError } = useAuth();
+  const { login, register, user, isLoading: authLoading, error: authError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: Location })?.from?.pathname || '/';
@@ -65,9 +67,22 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      await login(email, password);
-      setToast({ message: 'Bienvenido al panel administrativo', type: 'success' });
-      setTimeout(() => navigate(from, { replace: true }), 1000);
+      if (!isFirebaseConfigured) {
+        // Local fallback authentication
+        const raw = localStorage.getItem('localUsers');
+        const users = raw ? JSON.parse(raw) : [];
+        const found = users.find((u: any) => u.email === email && u.password === password);
+        if (found) {
+          setToast({ message: 'Sesión iniciada (local)', type: 'success' });
+          setTimeout(() => navigate(from, { replace: true }), 800);
+        } else {
+          setToast({ message: 'Usuario no encontrado (local). Regístrate primero.', type: 'error' });
+        }
+      } else {
+        await login(email, password);
+        setToast({ message: 'Bienvenido al panel administrativo', type: 'success' });
+        setTimeout(() => navigate(from, { replace: true }), 1000);
+      }
     } catch (error: unknown) {
       const msg = authError || (error as Error).message || 'Error al iniciar sesión';
       setToast({ message: msg, type: 'error' });
@@ -76,7 +91,38 @@ const Login = () => {
     }
   };
 
-  const isFormValid = email && password && !emailError && !passwordError;
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email || !password) {
+      setToast({ message: 'Completa nombre, correo y contraseña', type: 'error' });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      if (!isFirebaseConfigured) {
+        const raw = localStorage.getItem('localUsers');
+        const users = raw ? JSON.parse(raw) : [];
+        if (users.find((u: any) => u.email === email)) {
+          setToast({ message: 'El correo ya está registrado (local).', type: 'error' });
+        } else {
+          users.push({ name, email, password });
+          localStorage.setItem('localUsers', JSON.stringify(users));
+          setToast({ message: 'Registro local exitoso. Ya puedes iniciar sesión.', type: 'success' });
+          setIsRegistering(false);
+        }
+      } else {
+        await register(email, password, name);
+        setToast({ message: 'Registro completado. Bienvenido.', type: 'success' });
+        setIsRegistering(false);
+      }
+    } catch (err) {
+      setToast({ message: 'Error al registrar', type: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const isFormValid = isRegistering ? (name && email && password && !emailError && !passwordError) : (email && password && !emailError && !passwordError);
 
   return (
     <div className="login-container">
@@ -87,7 +133,15 @@ const Login = () => {
           <p className="brand-subtitle">Panel Administrativo</p>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={isRegistering ? handleRegister : handleSubmit}>
+          {isRegistering && (
+            <div className="form-group">
+              <label htmlFor="name">Nombre Completo</label>
+              <div className="input-wrapper">
+                <input id="name" className="form-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre" />
+              </div>
+            </div>
+          )}
           <div className="form-group">
             <label htmlFor="email">Correo Electrónico</label>
             <div className="input-wrapper">
@@ -137,6 +191,11 @@ const Login = () => {
             )}
           </button>
         </form>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 10 }}>
+          <button className="btn-ghost" onClick={() => setIsRegistering((s) => !s)}>
+            {isRegistering ? 'Volver a iniciar sesión' : 'Crear una cuenta'}
+          </button>
+        </div>
 
         <div className="login-footer">
           <p className="footer-text">

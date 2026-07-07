@@ -13,6 +13,7 @@ import {
   limit,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '../firebase';
+import { sampleProducts } from '../data/sampleProducts';
 
 const productsCollection = db ? collection(db, 'products') : null;
 
@@ -24,10 +25,22 @@ export const useProducts = () => {
   const loadProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
-
     if (!isFirebaseConfigured || !productsCollection) {
-      setError('Firebase no está configurado.');
-      setLoading(false);
+      // Fallback: load from localStorage or bundled sample
+      try {
+        const stored = localStorage.getItem('localProducts');
+        if (stored) {
+          setProducts(JSON.parse(stored));
+        } else {
+          setProducts(sampleProducts);
+          localStorage.setItem('localProducts', JSON.stringify(sampleProducts));
+        }
+      } catch (err) {
+        console.error('Error al cargar productos locales:', err);
+        setError('Error al cargar productos locales.');
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
@@ -46,10 +59,19 @@ export const useProducts = () => {
   const createProduct = async (product: Omit<Product, 'id'>) => {
     setLoading(true);
     setError(null);
-
     if (!isFirebaseConfigured || !productsCollection) {
-      setError('Firebase no está configurado.');
-      setLoading(false);
+      try {
+        const all = [...products];
+        const newItem = { id: `local-${Date.now()}`, ...product, createdAt: product.createdAt ?? new Date().toISOString() } as Product;
+        const updated = [newItem, ...all];
+        setProducts(updated);
+        localStorage.setItem('localProducts', JSON.stringify(updated));
+      } catch (err) {
+        setError('Error al crear producto local.');
+        throw err;
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 

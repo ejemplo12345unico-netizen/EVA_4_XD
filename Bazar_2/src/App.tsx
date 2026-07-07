@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import { isFirebaseConfigured } from './firebase';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -42,7 +43,8 @@ function App() {
 
   return (
     <AuthProvider>
-      <Router>
+      <CartProvider>
+        <Router>
         {firebaseWarning}
         <Routes>
           {/* Public Routes */}
@@ -61,7 +63,8 @@ function App() {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </Router>
+        </Router>
+      </CartProvider>
     </AuthProvider>
   );
 }
