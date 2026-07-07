@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import type { ReactNode } from 'react';
 
 const navItems = [
-  { to: '/', label: 'Resumen', icon: '📊' },
+  { to: '/dashboard', label: 'Resumen', icon: '📊' },
   { to: '/productos', label: 'Productos', icon: '🛍️' },
   { to: '/contactos', label: 'Solicitudes', icon: '✉️' },
 ];

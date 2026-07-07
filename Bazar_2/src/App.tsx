@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { isFirebaseConfigured } from './firebase';
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProductList from './pages/Products/ProductList';
@@ -44,14 +45,20 @@ function App() {
       <Router>
         {firebaseWarning}
         <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/contacto" element={<ContactForm />} />
-          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/productos" element={<ProtectedRoute><ProductList /></ProtectedRoute>} />
           <Route path="/productos/nuevo" element={<ProtectedRoute><ProductForm /></ProtectedRoute>} />
           <Route path="/productos/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
           <Route path="/productos/editar/:id" element={<ProtectedRoute><ProductForm /></ProtectedRoute>} />
           <Route path="/contactos" element={<ProtectedRoute><ContactList /></ProtectedRoute>} />
+
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

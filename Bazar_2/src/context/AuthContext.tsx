@@ -3,8 +3,10 @@ import type { User } from '../types';
 import { auth, isFirebaseConfigured } from '../firebase';
 import {
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  updateProfile,
   type User as FirebaseUser,
 } from 'firebase/auth';
 
@@ -13,6 +15,7 @@ interface AuthContextProps {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -26,8 +29,11 @@ const mapFirebaseAuthError = (code: string): string => {
     'auth/user-disabled': 'Esta cuenta ha sido deshabilitada.',
     'auth/too-many-requests': 'Demasiados intentos fallidos. Intenta más tarde.',
     'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+    'auth/email-already-in-use': 'Este correo ya está registrado.',
+    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+    'auth/operation-not-allowed': 'Registro deshabilitado en la configuración.',
   };
-  return errorMap[code] || 'Error al iniciar sesión. Intenta de nuevo.';
+  return errorMap[code] || 'Error de autenticación. Intenta de nuevo.';
 };
 
 const mapFirebaseUser = (firebaseUser: FirebaseUser | null): User | null => {
@@ -78,6 +84,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const register = async (email: string, password: string, name: string) => {
+    setError(null);
+    
+    if (!isFirebaseConfigured || !auth) {
+      const msg = 'Firebase no está configurado. Revisa .env y reinicia.';
+      setError(msg);
+      throw new Error(msg);
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: name });
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code || '';
+      const message = mapFirebaseAuthError(code);
+      setError(message);
+      throw new Error(message);
+    }
+  };
+
   const logout = async () => {
     setError(null);
     
@@ -91,7 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, error, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, error, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
