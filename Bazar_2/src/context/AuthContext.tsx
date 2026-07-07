@@ -95,10 +95,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: name });
+      await updateProfile(userCredential.user, { displayName: name }).catch((updateError) => {
+        console.warn('No se pudo actualizar el perfil de usuario:', updateError);
+      });
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code || '';
-      const message = mapFirebaseAuthError(code);
+      const rawMessage = (err as Error)?.message || '';
+      const message = mapFirebaseAuthError(code) || rawMessage || 'Error de autenticación. Intenta de nuevo.';
+      console.error('Auth register error:', { code, rawMessage, err });
       setError(message);
       throw new Error(message);
     }
